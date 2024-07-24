@@ -579,13 +579,34 @@ class DreamBoothDataset(Dataset):
             pixel_values.append(image)
 
         return pixel_values
-
     def convert_to_torch_tensor(self, embeddings: list):
         prompt_embeds = embeddings[0]
         pooled_prompt_embeds = embeddings[1]
-        prompt_embeds = np.array(prompt_embeds).reshape(154, 4096)
-        pooled_prompt_embeds = np.array(pooled_prompt_embeds).reshape(2048)
+
+        # Dynamically calculate the shape
+        prompt_embeds_size = len(prompt_embeds)
+        pooled_prompt_embeds_size = len(pooled_prompt_embeds)
+
+        # For demonstration, we assume that pooled_prompt_embeds should be a 1D tensor
+        # and prompt_embeds should be reshaped to a 2D tensor with the second dimension fixed to 4096.
+        fixed_dim = 4096
+        if prompt_embeds_size % fixed_dim != 0:
+            raise ValueError(f"prompt_embeds size {prompt_embeds_size} is not compatible with fixed dimension {fixed_dim}")
+
+        # Calculate the first dimension
+        dynamic_dim = prompt_embeds_size // fixed_dim
+
+        # Reshape the arrays
+        prompt_embeds = np.array(prompt_embeds).reshape(dynamic_dim, fixed_dim)
+        pooled_prompt_embeds = np.array(pooled_prompt_embeds).reshape(pooled_prompt_embeds_size)
+
         return torch.from_numpy(prompt_embeds), torch.from_numpy(pooled_prompt_embeds)
+    # def convert_to_torch_tensor(self, embeddings: list):
+    #     prompt_embeds = embeddings[0]
+    #     pooled_prompt_embeds = embeddings[1]
+    #     prompt_embeds = np.array(prompt_embeds).reshape(154, 4096)
+    #     pooled_prompt_embeds = np.array(pooled_prompt_embeds).reshape(2048)
+    #     return torch.from_numpy(prompt_embeds), torch.from_numpy(pooled_prompt_embeds)
 
     def map_image_hash_embedding(self, data_df_path):
         hashes_df = pd.read_parquet(data_df_path)
