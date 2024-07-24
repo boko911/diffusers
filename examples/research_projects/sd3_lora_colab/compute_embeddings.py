@@ -76,7 +76,13 @@ def run(args):
 
     # Assumes that the images within `args.local_image_dir` have a JPEG extension. Change
     # as needed.
+    print(f"Searching for images in {args.local_data_dir}")
+    print("JPEG IMAGES")
     image_paths = glob.glob(f"{args.local_data_dir}/*.jpeg")
+    # if image_path is empty, get *.png instead
+    if not image_paths:
+        print("NO JPEG IMAGES FOUND, TRYING PNG IMAGES")
+        image_paths = glob.glob(f"{args.local_data_dir}/*.png")
     data = []
     for image_path in image_paths:
         img_hash = generate_image_hash(image_path)
@@ -119,5 +125,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--output_path", type=str, default=OUTPUT_PATH, help="Path to serialize the parquet file.")
     args = parser.parse_args()
+
+    print(args)
 
     run(args)
